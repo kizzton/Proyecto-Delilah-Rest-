@@ -80,11 +80,11 @@ rol : (1: Admin, 0: User)
 {  
 
     "username": "superUser",
-    "fullname": "Leandro",  
-    "email": "leandro@mail",  
-    "phone": "123456789",
-    "adress": "calle sin nonombre 123",
-    "password": "root123",
+    "fullname": "Miguel Calle",  
+    "email": "miguelcalle@mail.com",  
+    "phone": "0123456789",
+    "adress": "Calle Falsa 123",
+    "password": "pass0123",
     "is_admin": 1                  
 
 }
