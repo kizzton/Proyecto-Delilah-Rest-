@@ -1,0 +1,772 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Proyecto Delilah Restó
+  description: API del proyecto Delilah Restó que emula la tarea de un desarrollador backend.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+# Added by API Auto Mocking Plugin
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/kizzton/Proyecto_Delilah_Resto/1.0.0
+tags:
+  - name: users
+    description: Create admin and non-admin, read, update, delete and log in users
+  - name: products
+    description: Create, read, update and delete products
+  - name: orders
+    description: Create, read, update and delete orders
+
+paths:
+  /users:
+      post:
+        tags:
+          - users
+        summary: Add a new user
+        operationId: addUser
+        responses:
+          '200':
+            description: User successfully created
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/User'
+          
+          '500':
+            description: Internal Server Error
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: User Object to be created
+          required: true
+      get:
+        security:
+          - Authorization: []
+        tags:
+          - users
+        summary: See all users
+        operationId: getUsers
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+        responses:
+          '200':
+            description: Successful Operation
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/User'
+          
+          '500':
+            description: Internal Server Error
+  
+  '/users/{userId}':
+      get:
+        security:
+          - Authentication: []
+        tags:
+          - users
+        summary: Find user by ID
+        description: Returns one user found by Id. Non Admin users can only see their own information and Admins can see it from all users.
+        operationId: getUserById
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin or non Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: userId
+            in: path
+            description: ID of the user whose information we want to see
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/User'
+      
+          '500':
+            description: Internal Server Error
+      
+      put:
+        security:
+          - Authentication: []
+        tags:
+          - users
+        summary: Update user information
+        description: This operation can only be done by the user whose information wants to be modified. User token must be sent in the header
+        operationId: updateUser
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin or non Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: userId
+            in: path
+            description: ID of the user whose information we want to update
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: User successfully updated
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/User'
+          '402':
+            description: Bad request, Id must be a number
+          '404':
+            description: Not found id
+          '500':
+            description: Internal Server Error
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserUpdate'
+          description: Users information to update, none of the properties are obligatory
+      
+      delete:
+        security:
+          - Authentication: []
+        tags:
+          - users
+        summary: Delete a User
+        description: This operation can only be done by the user to delete or an Admin user. User token must be sent in the header
+        operationId: deleteUser
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin or non Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: userId
+            in: path
+            description: Id of the user to be deleted
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: User successfully deleted
+          '402':
+            description: Bad request, Id must be a number
+          '404':
+            description: Not found id
+          '500':
+            description: Internal Server Error
+            
+  /users/login:
+      post:
+        tags:
+          - users
+        summary: Log in a User to receive a Json Web Token
+        operationId: userLogIn
+        responses:
+          '200':
+            description: User successfully logged in
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+                      example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+                    user_id:
+                      type: integer
+                      format: int64
+                      example: 29
+          '401':
+            description: Unauthorized, User or pass wrong
+          '402':
+            description: Bad request, You should send user and pass 
+          '500':
+            description: Internal Server Error
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                    description: It can be the users username or email
+                    example: "miguelcalle"
+                  password:
+                    type: string
+                    example: "pass0123"
+          description: Username or email and password of the User to log in
+          required: true
+          
+  /products:
+      post:
+        security:
+          - Authorization: []
+        tags:
+          - products
+        summary: Add a new product
+        operationId: addProduct
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+        responses:
+          '200':
+            description: Product successfully created
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Product'
+          
+          '500':
+            description: Internal Server Error
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+          description: Product object to be created
+          required: true
+      get:
+        security: 
+          - Authentication: []
+        tags:
+          - products
+        summary: See all products
+        operationId: getProducts
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin or non Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+        responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Product'
+          
+          '500':
+            description: Internal Server Error
+  
+  '/products/{productId}':
+      get:
+        security: 
+          - Authentication: []
+        tags:
+          - products
+        summary: See a product selected by Id
+        operationId: getProductById
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin or non Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: productId
+            in: path
+            description: ID of the product to be seen
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Successful Operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Product'
+          
+          '500':
+            description: Internal Server Error
+      put:
+        security: 
+          - Authorization: []
+        tags:
+          - products
+        summary: Update a products information
+        operationId: updateProduct
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: productId
+            in: path
+            description: ID of the product to update
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Product successfully updated
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Product'
+          '402':
+            description: Bad request, Id must be a number
+          '404':
+            description: Not found id
+          '500':
+            description: Internal Server Error
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductUpdate'
+          description: Products information to update, none of the properties are obligatory
+          
+      delete:
+        security: 
+          - Authorization: []
+        tags:
+          - products
+        summary: Delete a product selected by Id
+        operationId: deleteProduct      
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: productId
+            in: path
+            description: ID of the product to delete
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Product successfully deleted
+          '402':
+            description: Bad request, Id must be a number
+          '404':
+            description: Not found id
+          '500':
+            description: Internal Server Error
+            
+  /orders:
+      post:
+        security: 
+          - Authentication: []
+        tags:
+          - orders
+        summary: Add a new order
+        operationId: addOrder
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of a non Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+        responses:
+          '200':
+            description: Order successfully created
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Order'
+          
+          '500':
+            description: Internal Server Error
+        requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrder'
+          description: Order object to create
+          required: true
+      
+      get:
+        security: 
+          - Authentication: []
+        tags:
+          - orders
+        summary: See all orders
+        operationId: getOrders
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin or non Admin user given in the login endpoint. Admins see all orders from all users and non Admins only all their OWN orders
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+        responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Order'
+          
+          '500':
+            description: Internal Server Error
+  
+  '/orders/{orderId}':
+      get:
+        security: 
+          - Authentication: []
+        tags:
+          - orders
+        summary: See one order selected by Id
+        operationId: getOrderById
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin or non Admin user given in the login endpoint. Admins can see all orders from all users and non Admins only one of their OWN
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: orderId
+            in: path
+            description: ID of order to return
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Order'
+          
+          '500':
+            description: Internal Server Error
+      
+      put:
+        security: 
+          - Authorization: []
+        tags:
+          - orders
+        summary: Update the state of a order selected by Id
+        operationId: updateOrder
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: orderId
+            in: path
+            description: ID of order to update
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Order successfully updated
+          '402':
+            description: Bad request, Id must be a number
+          '404':
+            description: Not found id
+          '500':
+            description: Internal Server Error
+        requestBody:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  order_state:
+                    type: string
+                    enum:
+                      - nuevo
+                      - confirmado
+                      - preparando
+                      - enviando
+                      - entregado
+                      - cancelado
+                    example: cancelado
+          description: Orders information to update
+      delete:
+        security: 
+          - Authorization: []
+        tags:
+          - orders
+        summary: Delete a order selected by Id
+        operationId: deleteOrder      
+        parameters:
+          - name: Authorization
+            in: header
+            description: Token of an Admin user given in the login endpoint
+            required: true
+            schema:
+              type: string
+              example: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoyNSwiaWF0IjoxNTgzOTUyNDgpfQ.k0xIQpfxHybU1U0DMIGVXC1OHDG8tMmq3fx4A4V4H5w"
+          - name: orderId
+            in: path
+            description: ID of order to delete
+            required: true
+            schema:
+              type: integer
+              format: int64
+        responses:
+          '200':
+            description: Order successfully deleted
+          '402':
+            description: Bad request, Id must be a number
+          '404':
+            description: Not found id
+          '500':
+            description: Internal Server Error
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - user_name
+        - fullname
+        - email
+        - phone
+        - adress
+        - password
+      properties:
+        user_id:
+          type: integer
+          format: int64
+          readOnly: true
+          example: 29
+        user_name:
+          type: string
+          example: "bootUser"
+        fullname:
+          type: string
+          example: "Miguel Calle"
+        email:
+          type: string
+          example: "miguelcalle@mail.com"
+        adress:
+          type: string
+          example: "Calle Falsa 123"
+        phone:
+          type: string
+          maxLength: 10
+          example: "0123456789"
+        password:
+          type: string
+          writeOnly: true
+          example: "pass0123"
+        is_admin:
+          type: boolean
+          description: 1 if the user is an admin and 0 if the user is not an admin
+          readOnly: true
+          default: 0
+          example: 0
+          
+    Product:
+      type: object
+      required:
+        - product_name
+        - description
+        - price
+        - produc_image
+      properties:
+        product_id:
+          type: integer
+          format: int64
+          readOnly: true
+          example: 4
+        product_name:
+          type: string
+          example: "Hamburguesa Clásica"
+        description:
+          type: string
+          example: "hamburguesa con queso, lechuga, tomate, huevo y aderezo"
+        link_img:
+          type: string
+          example: "https://images.unsplash.com/photo-1549611016-3a70d82b5040?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60"
+        price:
+          type: integer
+          maxLength: 6
+          example: 330
+          
+    Order:
+      type: object
+      properties:
+        order_id: 
+          type: integer
+          format: int64
+          readOnly: true
+          example: 6,
+        paymentmethod: 
+          type: string
+          enum:
+            - efectivo
+            - credito
+          example: "efectivo"
+        state: 
+          type: string
+          enum:
+            - nuevo
+            - confirmado
+            - preparando
+            - enviando
+            - entregado
+            - cancelado
+          example: "nuevo"
+        time: 
+          type: string
+          readOnly: true
+          format: date-time
+          example: "2021-03-02 20:14:03.000Z"
+        total_price: 
+          type: integer
+          example: 840
+        user_id: 
+          type: integer
+          format: int64
+          description: id of user that sent the order
+          example: 21
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              quantity: 
+                type: integer
+                example: 1
+              product_id: 
+                type: integer
+                format: int64
+                readOnly: true
+                example: 8
+              product_name: 
+                type: string
+                example: "Sandwich Veggie"
+              price: 
+                type: integer
+                example: 200
+                
+    CreateOrder:
+      type: object
+      required:
+        - products
+        - product_id
+        - quantity
+        - paymentmethod
+      properties:
+        products:
+          type: array
+          items: 
+            type: object
+            properties:
+              product_id: 
+                type: integer
+                example: 34
+              quantity: 
+                type: integer
+                example: 1
+        paymentmethod:
+          type: string
+          example: "efectivo"        
+    
+    UserUpdate:
+      type: object
+      properties:
+        fullname:
+          type: string
+          example: "Miguel Calle"
+        email:
+          type: string
+          example: "miguelcalle@mail.com"
+        adress:
+          type: string
+          example: "Calle Falsa 123"
+        phone:
+          type: string
+          maxLength: 10
+          example: "0123456789"
+      description: User object to send for updates, none of the properties are obligatory
+      
+    ProductUpdate:
+      type: object
+      properties:
+        product_id:
+          type: integer
+          format: int64
+          readOnly: true
+          example: 4
+        product_name:
+          type: string
+          example: "Hamburguesa Clásica"
+        description:
+          type: string
+          example: "Hamburguesa con queso"
+        product_image:
+          type: string
+          example: "https://images.unsplash.com/photo-1549611016-3a70d82b5040?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=60"
+        price:
+          type: integer
+          maxLength: 6
+          example: 330
+      description: Product object to send for updates, none of the properties are obligatory
+      
+  securitySchemes:
+    Authentication:      
+      type: http
+      scheme: bearer
+      description: JWT of an admin or non admin User
+      bearerFormat: Json Web Token
+    Authorization:      
+      type: http
+      scheme: bearer
+      description: JWT of an admin User
+      bearerFormat: Json Web Token
