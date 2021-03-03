@@ -103,7 +103,7 @@ Ejemplo
 ```
 {  
   "username": "bootUser",
-  "pass": "abc123"                
+  "pass": "word3210"                
 }
 ```
 
